@@ -1,18 +1,19 @@
 package com.example.akuntansi.ui.setup
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
-
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
+import kotlinx.coroutines.launch
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.text.font.FontWeight
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,6 +25,10 @@ fun SetupScreen(onBack: () -> Unit) {
     val akunList = listOf("1101 - Kas", "1102 - Bank", "1201 - Piutang")
     var expanded by remember { mutableStateOf(false) }
 
+    // ✅ Snackbar
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -34,7 +39,8 @@ fun SetupScreen(onBack: () -> Unit) {
                     }
                 }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -95,6 +101,26 @@ fun SetupScreen(onBack: () -> Unit) {
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
+
+            // ✅ Dorong tombol ke bawah
+            Spacer(modifier = Modifier.weight(1f))
+
+            Button(
+                onClick = {
+                    // TODO: nanti simpan ke database / kirim ke ViewModel
+                    scope.launch {
+                        snackbarHostState.showSnackbar("Berhasil disimpan")
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(14.dp)
+            ) {
+                Text("Simpan", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }

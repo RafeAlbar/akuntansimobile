@@ -29,7 +29,9 @@ import com.example.akuntansi.ui.components.MenuTile
 
 @Composable
 fun HomeScreen(
-    onOpenSetup: () -> Unit
+    onOpenSetup: () -> Unit,
+    onOpenTransaksi: () -> Unit,
+    onOpenLaporan: () -> Unit = {}
 ) {
     val headerColor = Color(0xFF2F2FBF)
     val cardYellow = Color(0xFFF4B400)
@@ -41,9 +43,9 @@ fun HomeScreen(
 
     val menu = listOf(
         MenuItem("Setup", Icons.Default.Settings, Color(0xFF3D3DE0), onClick = onOpenSetup),
-        MenuItem("Transaksi", Icons.Default.AttachMoney, Color(0xFFF4B400), onClick = { }),
-        MenuItem("Laporan", Icons.Default.ReceiptLong, Color(0xFF3D3DE0), onClick = { }),
-        MenuItem("Transaksi", Icons.Default.Apps, Color(0xFFE91E63), onClick = { }),
+        MenuItem("Transaksi", Icons.Default.AttachMoney, Color(0xFFF4B400), onClick = onOpenTransaksi),
+        MenuItem("Laporan", Icons.Default.ReceiptLong, Color(0xFF3D3DE0), onClick = onOpenLaporan),
+        MenuItem("Data Transaksi", Icons.Default.Apps, Color(0xFFE91E63), onClick = { }),
         MenuItem("Rekom BEP", Icons.Default.Calculate, Color(0xFF1DB954), onClick = { }),
     )
 

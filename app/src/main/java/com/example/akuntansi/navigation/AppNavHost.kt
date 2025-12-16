@@ -12,6 +12,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.akuntansi.ui.components.BottomBar
 import com.example.akuntansi.ui.home.HomeScreen
 import com.example.akuntansi.ui.setup.SetupScreen
+import com.example.akuntansi.ui.transaksi.TransaksiScreen
+import com.example.akuntansi.ui.laporan.LaporanScreen
 
 @Composable
 fun AppNavHost() {
@@ -39,7 +41,9 @@ fun AppNavHost() {
         ) {
             composable(Routes.HOME) {
                 HomeScreen(
-                    onOpenSetup = { navController.navigate(Routes.SETUP) }
+                    onOpenSetup = { navController.navigate(Routes.SETUP) },
+                    onOpenTransaksi = { navController.navigate(Routes.TRANSAKSI) },
+                    onOpenLaporan = { navController.navigate(Routes.LAPORAN) }
                 )
             }
             composable(Routes.SETUP) {
@@ -47,9 +51,33 @@ fun AppNavHost() {
             }
 
             // placeholder tab
-            composable(Routes.SEARCH) { HomeScreen(onOpenSetup = { navController.navigate(Routes.SETUP) }) }
-            composable(Routes.INBOX) { HomeScreen(onOpenSetup = { navController.navigate(Routes.SETUP) }) }
-            composable(Routes.SETTINGS) { HomeScreen(onOpenSetup = { navController.navigate(Routes.SETUP) }) }
+            composable(Routes.SEARCH) {
+                HomeScreen(
+                    onOpenSetup = { navController.navigate(Routes.SETUP) },
+                    onOpenTransaksi = { navController.navigate(Routes.TRANSAKSI) }
+                )
+            }
+            composable(Routes.INBOX) {
+                HomeScreen(
+                    onOpenSetup = { navController.navigate(Routes.SETUP) },
+                    onOpenTransaksi = { navController.navigate(Routes.TRANSAKSI) }
+                )
+            }
+            composable(Routes.SETTINGS) {
+                HomeScreen(
+                    onOpenSetup = { navController.navigate(Routes.SETUP) },
+                    onOpenTransaksi = { navController.navigate(Routes.TRANSAKSI) }
+                )
+            }
+
+            composable(Routes.TRANSAKSI) {
+                TransaksiScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Routes.LAPORAN) {
+                LaporanScreen(onBack = { navController.popBackStack() })
+            }
+
+
         }
     }
 }
