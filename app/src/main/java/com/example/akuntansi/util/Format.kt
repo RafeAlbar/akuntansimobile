@@ -1,6 +1,7 @@
 package com.example.akuntansi.util
 
-fun formatRupiah(value: Int): String {
+// [CHANGES] ganti Int -> Long supaya aman untuk nominal besar
+fun formatRupiah(value: Long): String {
     val s = value.toString()
     val sb = StringBuilder()
     var count = 0
@@ -11,3 +12,6 @@ fun formatRupiah(value: Int): String {
     }
     return sb.reverse().toString()
 }
+
+// [CHANGES] overload biar kode lama yang kirim Int tetap jalan
+fun formatRupiah(value: Int): String = formatRupiah(value.toLong())

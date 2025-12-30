@@ -8,26 +8,47 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.akuntansi.data.model.setup.AkunDto
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.text.font.FontWeight
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SetupScreen(onBack: () -> Unit) {
-    var akun by remember { mutableStateOf("1101 - Kas") }
+fun SetupScreen(
+    onBack: () -> Unit,
+    vm: SetupViewModel = viewModel()
+) {
+    // ✅ Simpan akun sebagai object biar dapet id juga
+    var akunSelected by remember { mutableStateOf<AkunDto?>(null) }
+
     var tanggal by remember { mutableStateOf("11 / 12 / 2025") }
     var nominal by remember { mutableStateOf("80.000") }
 
-    val akunList = listOf("1101 - Kas", "1102 - Bank", "1201 - Piutang")
     var expanded by remember { mutableStateOf(false) }
 
     // ✅ Snackbar
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+
+    // ✅ Load data akun pertama kali screen dibuka
+    LaunchedEffect(Unit) {
+        vm.loadAkun()
+    }
+
+    // ✅ Kalau ada error, tampilkan snackbar
+    LaunchedEffect(vm.error) {
+        vm.error?.let { msg ->
+            snackbarHostState.showSnackbar(msg)
+        }
+    }
+
+    // ✅ List akun dari API
+    val akunList = vm.akunItems
 
     Scaffold(
         topBar = {
@@ -42,6 +63,7 @@ fun SetupScreen(onBack: () -> Unit) {
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { padding ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -55,15 +77,27 @@ fun SetupScreen(onBack: () -> Unit) {
 
             ExposedDropdownMenuBox(
                 expanded = expanded,
-                onExpandedChange = { expanded = !expanded }
+                onExpandedChange = {
+                    // jangan buka menu kalau masih loading / list kosong
+                    if (!vm.loading && akunList.isNotEmpty()) {
+                        expanded = !expanded
+                    }
+                }
             ) {
+                val displayText = when {
+                    vm.loading -> "Memuat akun..."
+                    akunSelected != null -> "${akunSelected!!.kode_akun} - ${akunSelected!!.nama_akun}"
+                    else -> "Pilih akun"
+                }
+
                 OutlinedTextField(
                     modifier = Modifier
                         .fillMaxWidth()
                         .menuAnchor(),
-                    value = akun,
+                    value = displayText,
                     onValueChange = {},
                     readOnly = true,
+                    enabled = !vm.loading && akunList.isNotEmpty(),
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) }
                 )
 
@@ -73,9 +107,9 @@ fun SetupScreen(onBack: () -> Unit) {
                 ) {
                     akunList.forEach { item ->
                         DropdownMenuItem(
-                            text = { Text(item) },
+                            text = { Text("${item.kode_akun} - ${item.nama_akun}") },
                             onClick = {
-                                akun = item
+                                akunSelected = item
                                 expanded = false
                             }
                         )
@@ -96,29 +130,42 @@ fun SetupScreen(onBack: () -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
                 value = "Rp. $nominal",
                 onValueChange = { newValue ->
-                    nominal = newValue.replace("Rp.", "").trim()
+                    nominal = newValue.replace("Rp.", "", ignoreCase = true).trim()
                 },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 
-            // ✅ Dorong tombol ke bawah
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
                 onClick = {
-                    // TODO: nanti simpan ke database / kirim ke ViewModel
                     scope.launch {
-                        snackbarHostState.showSnackbar("Berhasil disimpan")
+                        val akun = akunSelected
+                        if (akun == null) {
+                            snackbarHostState.showSnackbar("Pilih akun dulu")
+                            return@launch
+                        }
+
+                        vm.storeSaldoAwal(
+                            userId = 1L,                // sementara (kalau belum token/login)
+                            akunId = akun.id,
+                            tanggalUi = tanggal,
+                            nominalUi = nominal,
+                            onSuccess = { msg -> scope.launch { snackbarHostState.showSnackbar(msg) } },
+                            onError = { msg -> scope.launch { snackbarHostState.showSnackbar(msg) } }
+                        )
                     }
                 },
+                enabled = !vm.saving, // biar gak dobel klik saat request jalan
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
                 shape = RoundedCornerShape(14.dp)
             ) {
-                Text("Simpan", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                Text(if (vm.saving) "Menyimpan..." else "Simpan", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
             }
+
 
             Spacer(modifier = Modifier.height(8.dp))
         }
