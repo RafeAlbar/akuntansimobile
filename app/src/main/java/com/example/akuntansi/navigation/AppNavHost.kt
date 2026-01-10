@@ -11,9 +11,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.akuntansi.ui.components.BottomBar
 import com.example.akuntansi.ui.home.HomeScreen
-import com.example.akuntansi.ui.setup.SetupScreen
-import com.example.akuntansi.ui.transaksi.TransaksiScreen
 import com.example.akuntansi.ui.laporan.LaporanScreen
+import com.example.akuntansi.ui.setup.SetupScreen
+import com.example.akuntansi.ui.transaksi.TransaksiRootScreen
 
 @Composable
 fun AppNavHost() {
@@ -46,6 +46,7 @@ fun AppNavHost() {
                     onOpenLaporan = { navController.navigate(Routes.LAPORAN) }
                 )
             }
+
             composable(Routes.SETUP) {
                 SetupScreen(onBack = { navController.popBackStack() })
             }
@@ -70,14 +71,14 @@ fun AppNavHost() {
                 )
             }
 
+            // ✅ ini yang penting: buka ROOT (tabs)
             composable(Routes.TRANSAKSI) {
-                TransaksiScreen(onBack = { navController.popBackStack() })
+                TransaksiRootScreen(onBack = { navController.popBackStack() })
             }
+
             composable(Routes.LAPORAN) {
                 LaporanScreen(onBack = { navController.popBackStack() })
             }
-
-
         }
     }
 }

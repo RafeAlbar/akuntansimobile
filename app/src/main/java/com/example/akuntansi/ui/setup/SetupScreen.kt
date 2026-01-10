@@ -148,7 +148,7 @@ fun SetupScreen(
                         }
 
                         vm.storeSaldoAwal(
-                            userId = 1L,                // sementara (kalau belum token/login)
+                            userId = 1L,
                             akunId = akun.id,
                             tanggalUi = tanggal,
                             nominalUi = nominal,
